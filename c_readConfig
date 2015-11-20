@@ -1,0 +1,97 @@
+
+
+void triml(char* buf)
+{
+	int len = strlen(buf);
+	char * p = buf;
+	for (int i = 0; i < len; i++)
+	{
+		if (*p == ' ' || *p == '\t')	{ p++; continue; }
+		else break;
+	}
+
+	if (p == buf)	return;
+	else strcpy(buf, p);
+}
+
+void trimr(char* buf)
+{
+	int len = strlen(buf);
+	char* q = buf + len - 1;
+	while (q != buf && (*q == ' ' || *q == '\t'))
+	{
+		*q = '\0';
+		q--;
+	}
+}
+
+void test_trim()
+{
+	char buf[] = "	 key 	=	c d	";//"" " "
+
+	triml( buf);
+
+	if (buf[0] == '\0')		cout << "empty string" << endl;
+	else if (buf[0] == '#')		cout << "annotation string" << endl;
+	else {}
+
+	//string line(buf);
+	char *p = strchr(buf, '=');
+//	size_t pos = line.find('=');//找到每行的“=”号  
+	if (NULL == p)
+	{
+		printf("wrong format!\t");
+		return ;
+	}
+	else
+	{
+		char* q = p + 1;
+		*p = '\0';
+		trimr(buf);		//取=号之前
+
+		if (0 == strcmp("key", buf))
+		{
+			triml(q);	//取=号之后  
+			trimr(q);
+			printf("value=%s", q);;
+		}
+	}
+}
+
+
+static bool readConfigFile(const char * cfgfilepath, const string & key, string & value)
+{
+	fstream cfgFile;
+	cfgFile.open(cfgfilepath);//打开文件      
+	if (!cfgFile.is_open())
+	{
+		cout << "can not open cfg file!" << endl;
+		return false;
+	}
+	char tmp[1024];
+	while (!cfgFile.eof())
+	{
+		cfgFile.getline(tmp, 1000); 
+
+		triml(tmp);
+		//判断是否空行（）
+		if (tmp[0] == '\0')		continue;
+		//注释
+		else if (tmp[0] == '#')		continue;
+
+		string line(tmp);
+		size_t pos = line.find('=');//找到每行的“=”号  
+		if (pos == string::npos)
+		{
+			printf("wrong format!\t");
+			return false;
+		}
+		string tmpKey = line.substr(0, pos);//取=号之前  
+		if (key == tmpKey)
+		{
+			value = line.substr(pos + 1);//取=号之后  
+			return true;
+		}
+	}
+	return false;
+}
