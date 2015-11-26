@@ -1,5 +1,5 @@
 
-
+//取消左侧的空格,制表键
 void triml(char* buf)
 {
 	int len = strlen(buf);
@@ -14,6 +14,7 @@ void triml(char* buf)
 	else strcpy(buf, p);
 }
 
+//取消右侧的空格,制表键
 void trimr(char* buf)
 {
 	int len = strlen(buf);
@@ -25,6 +26,7 @@ void trimr(char* buf)
 	}
 }
 
+//测试
 void test_trim()
 {
 	char buf[] = "	 key 	=	c d	";//"" " "
@@ -58,8 +60,8 @@ void test_trim()
 	}
 }
 
-
-static bool readConfigFile(const char * cfgfilepath, const string & key, string & value)
+//读取配置文件
+static bool readConfigFile(const char * cfgfilepath, const char * key, char * value,  int length)
 {
 	fstream cfgFile;
 	cfgFile.open(cfgfilepath);//打开文件      
@@ -68,30 +70,53 @@ static bool readConfigFile(const char * cfgfilepath, const string & key, string 
 		cout << "can not open cfg file!" << endl;
 		return false;
 	}
-	char tmp[1024];
-	while (!cfgFile.eof())
+
+	char buf[256];
+	while (!cfgFile.eof())//循环读取  
 	{
-		cfgFile.getline(tmp, 1000); 
+		cfgFile.getline(buf, 1000);
 
-		triml(tmp);
+		//
+		triml(buf);
+
 		//判断是否空行（）
-		if (tmp[0] == '\0')		continue;
-		//注释
-		else if (tmp[0] == '#')		continue;
+		if (buf[0] == '\0')		continue;
+		//判断注释
+		else if (buf[0] == '#')		continue;
 
-		string line(tmp);
-		size_t pos = line.find('=');//找到每行的“=”号  
-		if (pos == string::npos)
+		//判断=号
+		char *p = strchr(buf, '=');
+		if (NULL == p)
 		{
 			printf("wrong format!\t");
 			return false;
 		}
-		string tmpKey = line.substr(0, pos);//取=号之前  
-		if (key == tmpKey)
+		else
 		{
-			value = line.substr(pos + 1);//取=号之后  
-			return true;
+			char* q = p + 1;
+			*p = '\0';
+			trimr(buf);		//去掉=号之前的空格，制表符
+
+			if (0 == strcmp(key, buf))
+			{
+				triml(q);	//去掉=号之后......
+				trimr(q);
+
+				unsigned int len = strlen(q);
+				if (len > length)
+				{
+					printf("more length needed!\n");
+					return false;
+				}
+				else
+				{
+					strcpy(value, q);
+					return true;
+				}
+				
+			}
 		}
 	}
+
 	return false;
 }
