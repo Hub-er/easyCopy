@@ -1,0 +1,98 @@
+#ifndef  TIME_STAT_H
+#define	 TIME_STAT_H
+
+//c 头文件
+#include <string>
+#include <vector>
+#include <map>
+using namespace std;
+
+//记录时间的起止及活动状态
+//活动状态初值false，当更新begin时，设置true，设置end时，设置为false。
+//活动状态的作用：判断是否重复设置begin、是否设置了begin而没有设置end...
+typedef struct s_time
+{
+	unsigned int	begin;
+	unsigned int	end;
+	bool			active;	//更新begin时置true,更新end时置false
+}s_time;
+
+static map<string, s_time>				  g_id2time;		//存储起止时间
+static map<string, unsigned int>		g_id2span;		//存储间隔时间的累积
+static vector<string>				      	g_error;		//错误
+
+//初始化
+void report_init()
+{
+	g_error.empty();
+}
+
+//更新一个新的begin
+void reportBegin(string id)
+{
+	int64 t = cvGetTickCount();
+	g_id2time[id].begin = t;
+	g_id2time[id].active = true;
+}
+
+//更新一个新的end
+void reportEnd(string id)
+{
+	  if (!g_id2time[id].active)
+  	{
+	  	// error occurs!
+		  g_error.push_back(id + ":not BEGIN time but got a END time");
+	  }
+	  else
+	  {
+	  	int64 t = cvGetTickCount();
+	  	g_id2time[id].end = t;
+	  	g_id2time[id].active = false;
+	}
+
+  	qint64 span = g_id2time[id].end - g_id2time[id].begin;
+  	if (g_id2span.find(id) == g_id2span.end())
+	  	g_id2span[id] = span;
+	  else g_id2span[id] += span;
+}
+
+void get_stat_result(map<string, unsigned int> &mp)
+{
+	mp = g_id2span;
+}
+
+void get_stat_err(vector<string> &errls)
+{
+	errls = g_error;
+}
+
+//宏定义
+#ifdef TIME_STAT
+	#define	REPORT_BEGIN(id)		reportBegin id
+#else
+	#define	REPORT_BEGIN(id)	
+#endif
+
+
+#ifdef TIME_STAT
+	#define REPORT_END(id)			reportEnd id
+#else
+	#define	REPORT_END(id)	
+#endif
+
+
+#ifdef TIME_STAT
+#define GET_STAT_RESULT(vec)		get_stat_result vec
+#else
+#define	GET_STAT_RESULT(vec)	
+#endif
+
+#endif
+
+
+int main()
+{
+  REPORT_BEGIN(id)
+  //.......
+  REPORT_END(id)	
+}
