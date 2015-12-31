@@ -1,0 +1,106 @@
+
+//
+static void multiImageInOne(const string title, const vector<st_img>& imgLs
+					   , CvSize tablePlot1, CvSize displaySize)  
+{  
+	int  rows = tablePlot1.height;
+	int  cols = tablePlot1.width;
+	
+	//
+	int imgNum = imgLs.size();
+	if (0 == imgNum	|| imgNum > rows * cols)
+	{  
+		//printf("target image must >0 OR table size not enouth \n!");  
+		return;  
+	}  
+
+
+	//计算真实的显示大小
+	IplImage* firstImg = (IplImage*)(imgLs[0].img);
+	CvSize imgSz	= cvSize(firstImg->width, firstImg->height);  
+	float rate_ori	= 1.0 * imgSz.width / imgSz.height;
+	float rate_tar  = 1.0 * displaySize.width / displaySize.height;
+
+	CvSize actualSz = imgSz;
+	if (rate_tar > rate_ori)
+	{
+		if (imgSz.height > displaySize.height)
+			actualSz = cvSize(displaySize.height*rate_ori, displaySize.height);
+	}
+	else
+	{
+		if (imgSz.width > displaySize.width)
+			actualSz = cvSize(displaySize.width, displaySize.width / rate_ori);
+	}
+	
+	//边宽、间隔
+	CvSize disEdge = cvSize(80, 60);  //上下左右之和
+	CvSize disGap  = cvSize(15, 15);  
+	//计算总大小
+	IplImage* disFrm = cvCreateImage(cv::Size(actualSz.width*cols	+ disEdge.width + (cols - 1)*disGap.width
+										, actualSz.height*rows + disEdge.height	+ (rows - 1)*disGap.height)
+									, IPL_DEPTH_8U, 3);
+	//字体
+	CvFont font;
+	cvInitFont(&font, CV_FONT_HERSHEY_PLAIN, 0.8, 0.8, 0, 1, 8);
+
+	//
+	CvPoint LT_Pos;
+	vector<IplImage*>	tmpLs;
+	for (int i = 0; i<imgNum; ++i)
+	{  
+		LT_Pos.x = (i % cols) * (disGap.width + actualSz.width) + disEdge.width / 2;
+		LT_Pos.y = (i / cols) * (disGap.height + actualSz.height) + disEdge.height / 2;
+
+		//人脸识别
+		IplImage* img = (IplImage*)(imgLs[i].img);
+		
+		cvSetImageROI(disFrm, cvRect(LT_Pos.x, LT_Pos.y, actualSz.width, actualSz.height));
+
+		//转换通道
+		if (img->nChannels == 1)
+		{
+			IplImage* imgClr = cvCreateImage(cvSize(img->width,img->height), img->depth, 3);
+			cvCvtColor(img, imgClr, CV_GRAY2BGR); 
+
+			tmpLs.push_back(imgClr);
+
+			img = imgClr;
+		}
+
+		//转换深度
+		if (IPL_DEPTH_8U != img->depth)
+		{
+			IplImage* imgClr = cvCreateImage(cvSize(img->width, img->height), IPL_DEPTH_8U, 3);
+			cvConvertScale(img, imgClr, 255, 0);//error!
+			tmpLs.push_back(imgClr);
+
+			img = imgClr;
+		}
+
+		//   
+		cvResize(img, disFrm);
+		// 重设ROI
+		cvResetImageROI(disFrm);
+
+		//注释
+		cvPutText(disFrm, imgLs[i].desc.c_str()
+			, cv::Point(LT_Pos.x, LT_Pos.y + actualSz.height + 10), &font, cv::Scalar(0, 0, 255));
+	}  
+
+	//释放
+	vector<IplImage*>::iterator		itr_3;
+	for (itr_3=tmpLs.begin()
+		; itr_3!=tmpLs.end()
+		; itr_3++)
+	{
+		IplImage* t = *itr_3;
+		cvReleaseImage(&t);
+	}
+
+	cvShowImage(title.c_str(), disFrm);
+	cvWaitKey(0);  
+	// 释放
+	cvReleaseImage(&disFrm);
+	  
+}
