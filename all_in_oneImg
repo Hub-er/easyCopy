@@ -58,7 +58,7 @@ static void multiImageInOne(const string title, const vector<st_img>& imgLs
 		LT_Pos.x = (i % cols) * (disGap.width + actualSz.width) + disEdge.width / 2;
 		LT_Pos.y = (i / cols) * (disGap.height + actualSz.height) + disEdge.height / 2;
 
-		//人脸识别
+		//
 		IplImage* img = (IplImage*)(imgLs[i].img);
 		
 		cvSetImageROI(disFrm, cvRect(LT_Pos.x, LT_Pos.y, actualSz.width, actualSz.height));
