@@ -1,4 +1,10 @@
 
+typedef struct
+{
+	void*		img;		//图像指针
+	std::string	desc;		//注释
+}st_img;
+
 //
 static void multiImageInOne(const string title, const vector<st_img>& imgLs
 					   , CvSize tablePlot1, CvSize displaySize)  
