@@ -1,0 +1,11 @@
+ //读取二进制文件到buff
+std::ifstream file("./1.jpg");
+std::vector<uchar> data;
+file >> std::noskipws;
+std::copy(std::istream_iterator<char>(file), std::istream_iterator<char>(), std::back_inserter(data));
+
+//写入二进制文件
+vectro<uchar> buff;
+ofstream out("./dst_wm.jpg", std::ios::binary | std::ios::out);
+copy(buff.begin(),buff.end(),ostream_iterator<uchar>(out));
+out.close();
