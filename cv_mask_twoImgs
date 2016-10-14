@@ -1,0 +1,15 @@
+        //添加水印
+        //logo.png为一个4通道图片，其中透明度在第4通道
+        cv::Mat oriImg = cv::imread("./src.jpg"); 
+        cv::Mat logo = cv::imread("./logo5.png");   //后面的标志采用默认值，会丢失第4个通道
+        int channel = logo.channels();      
+        
+        cv::Mat tmp = cv::imread("./logo5.png", -1);      //-1：不会丢失第4个通道
+        split(tmp,channels);                        //分离色彩通道  
+        Mat  mask =channels.at(3);                  //得到alpha通道
+//      imwrite("./mask.jpg", mask);                //mask中的黑色区域代表维持原图，白色代表覆盖原图
+
+        cv::Mat imageROI = oriImg(cv::Rect(0, 0     //设置兴趣区 
+                                , logo.cols,logo.rows));
+        //将logo叠加到兴趣区，注意mask
+        logo.copyTo(imageROI,mask);
