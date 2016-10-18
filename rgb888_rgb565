@@ -1,0 +1,81 @@
+#rgb565 ---> rgb888
+static int rgb565_to_rgb888(const  uchar* psrc, int w, int h, uchar* pdst, int src_step, int dst_step)    
+{    
+    const unsigned short* psrcline = (const unsigned short*)psrc;    
+    unsigned char  * pdstline = pdst; 
+    
+    const unsigned short * ps;    
+    unsigned char  * pd;
+
+//short: sizeof(short) = 2
+    for (int i=0; i<h; i++) 
+    {
+        ps = (const unsigned short *)psrcline;
+        pd = pdstline;
+        for (int j=0; j<w; j++) 
+        {
+                short temp = *ps;
+                *(pdstdot+3*j) = (unsigned char)((temp >> 0 ) << 3);
+                *(pdstdot+3*j+1) = (unsigned char)((temp >> 5 ) << 2);
+                *(pdstdot+3*j+2) = (unsigned char)((temp >> 11) << 3);
+
+                ps++;
+        }
+        psrcline += src_step;
+        pdstline += dst_step;
+    }
+
+    return 0;
+}
+
+//rgb888-->>rgb888
+static int rgb888_to_rgb565(const uchar* psrc, int w, int h, uchar* pdst, int src_step, int dst_step)
+{
+        const unsigned char *psrcline = (const unsigned char *)psrc;
+        unsigned short* pdstline = (unsigned short*)pdst;
+        const unsigned char * ps;
+        unsigned short * pd;     
+        unsigned char r, g, b;
+
+        for (int i=0; i<h; i++) {
+                ps = psrcline;
+                pd = (unsigned short *)pdstline;
+                
+                for (int j=0; j<w; j++) {
+                        b = ps[0] >> 3;
+                        g = ps[1] >> 2;
+                        r = ps[2] >> 3;
+                        *pd = (r << 11) | (g << 5) | b;
+                        
+                        ps += 3;
+                        pd ++; 
+                }
+                psrcline += src_step;
+                pdstline += dst_step;
+        }
+
+        return 0;
+}
+
+//test
+int main()
+{
+        Mat img_src = imread( "./1.jpg", 1);
+ #       int channel = img_src.channels();      //must be 3 channels
+ #       printf("channel:%d\n", channel);
+
+        Mat img_dst = cvCreateMat(img_src.rows, img_src.cols, CV_16UC1);
+  #      printf("srcstep:%d, dststep:%d\n", img_src.step1(), img_dst.step1());
+
+        rgb888_to_rgb565(img_src.data, img_src.cols, img_src.rows, img_dst.data, img_src.step1(), img_dst.step1());
+
+        //反转 验证！
+        Mat srccc = cvCreateMat(img_src.rows, img_src.cols, CV_8UC3);
+  #      printf("dst step:%d, srccc step:%d\n", img_dst.step1(), srccc.step1());
+        rgb565_to_rgb888(img_dst.data, img_dst.cols, img_dst.rows, srccc.data, img_dst.step1(), srccc.step1());
+
+        imwrite("./img_src.jpg", img_src);
+        imwrite("./img_dst.png", img_dst);
+        imwrite("./srccc.jpg", srccc);
+        return 0;
+ }
