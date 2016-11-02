@@ -1,0 +1,69 @@
+void addWaterMark(Mat& jpgsrc, Mat& pngsrc, Mat& dst)
+   {
+        //should be same size
+        int ch1 = jpgsrc.channels();
+        int ch2 = pngsrc.channels();
+        assert(3 == ch1 && 4 == ch2);
+
+        int wd = jpgsrc.cols;
+        int hg = jpgsrc.rows;
+        int wd1 = pngsrc.cols;
+        int hg1 = pngsrc.rows;
+        assert(wd == wd1 && hg == hg1);
+
+        unsigned char ch, b, g, r, l;
+        vector<Mat> channels;
+        split(pngsrc, channels);//分离色彩通道  
+        dst = jpgsrc.clone();
+
+        int step0 = channels[3].step1();
+        int step = jpgsrc.step1();
+        int step1 = pngsrc.step1();
+        int idx, idx1;
+        for (int i=0; i<hg; ++i)
+        for (int j=0; j<wd; ++j)
+        {
+                ch = channels[3].data[i*step0+j];
+                idx = i*step + j*3;
+                idx1 = i*step1 + j*4;
+
+                if (0 == ch) {}
+                else if (255 == ch)
+                {
+                                //覆盖成png的像素
+                                dst.data[idx + 0] = pngsrc.data[idx1 + 0];
+                                dst.data[idx + 1] = pngsrc.data[idx1 + 1];
+                                dst.data[idx + 2] = pngsrc.data[idx1 + 2];
+                }
+                else
+                {
+                                //计算透明度
+                                float rate = 1.0 * (256-ch) / 256;
+                                dst.data[idx + 0] = dst.data[idx + 0] * rate + pngsrc.data[idx1 + 0] * (1-rate);
+                                dst.data[idx + 1] = dst.data[idx + 1] * rate + pngsrc.data[idx1 + 1] * (1-rate);
+                                dst.data[idx + 2] = dst.data[idx + 2] * rate + pngsrc.data[idx1 + 2] * (1-rate);
+                }
+
+        }
+
+        //test
+//      imwrite("./xx.jpg", dst);
+}
+
+int main()
+{
+        //添加水印
+        const char* sample = "./1.jpg";
+        Mat jpgsrc = imread(sample, -1);
+        //读入图片
+        const char* tdrlogo = "./2_wbj_wmb.png";  //  1_btm_wmb.png 2_wbj_wmb.png
+        Mat pngsrc = imread(tdrlogo, -1);         //注意参数是-1
+
+        //添加水印接口
+        Mat result;
+        addWaterMark(jpgsrc, pngsrc, result);
+        
+        //打印结果
+        imwrite("./dst_wm.png", result);
+        return 0;
+}
