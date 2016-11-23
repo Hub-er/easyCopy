@@ -1,8 +1,6 @@
 #include <sys/time.h>
 
 struct timeval t_start,t_end;
-long cost_time=0;
-printf("-------------stat time for ...----------\n");
 gettimeofday(&t_start,NULL);
 long start = ((long)t_start.tv_sec)*1000 + (long)t_start.tv_usec / 1000;
 
@@ -10,6 +8,4 @@ long start = ((long)t_start.tv_sec)*1000 + (long)t_start.tv_usec / 1000;
  
 gettimeofday(&t_end,NULL);
 long   end=((long)t_end.tv_sec)*1000 +(long)t_end.tv_usec/1000;
-cost_time=end-start;
-
-printf("...... cost %ld ms\n", cost_time);
+printf("...... cost %ld ms\n", (end-start));
