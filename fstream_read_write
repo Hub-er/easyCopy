@@ -1,4 +1,6 @@
 
+#include<fstream>
+
  //二进制文件-->vector
 std::ifstream file("./1.jpg");
 std::vector<uchar> data;
@@ -23,3 +25,10 @@ int main () {
   myfile.close();
   return 0;
 }
+
+//ofstream写二进制文件
+char fn[128]="...";
+char arr_bin[...];
+std::ofstream fs(buf, std::ios::out | std::ios::binary | std::ios::app);
+fs.write(arr_bin, sizeof(arr_bin));
+fs.close();
