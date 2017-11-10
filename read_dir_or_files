@@ -1,0 +1,64 @@
+#include <vector>
+#include <string>
+
+using namespace std;
+#include <dirent.h>
+#include <string.h>
+
+//读取目录dir下的第一级文件（不包括其子文件夹下的文件）
+void readdir(const char* dir, std::vector<string>& files)
+{
+        DIR * dirp;
+        struct dirent * entry;
+        char buf[128]={ 0};
+
+        dirp = opendir(dir); /* there should be error handling after this */
+        while ((entry = readdir(dirp)) != NULL)
+        {
+
+                if (entry->d_type == DT_REG)
+                {
+
+                        strcpy(buf, dir);
+                        strcat(buf, "/");
+                        strcat(buf,entry->d_name);
+
+                        /* if the entry is a regular file */
+                        files.push_back(string(buf));
+                }
+        }
+        closedir(dirp);
+}
+
+//读取目录dir下的第一级文件夹（不包含文件，或者子文件夹）
+void readmultidir(const char* dir, std::vector<string>& dir_list)
+{
+        DIR * dirp;
+        struct dirent * entry;
+        char buf[128]={ 0};
+
+        dirp = opendir(dir); /* there should be error handling after this */
+        while ((entry = readdir(dirp)) != NULL)
+        {
+
+                if (entry->d_type == DT_REG)
+                {
+                        /*
+                        strcpy(buf, dir);
+                        strcat(buf, "/");
+                        strcat(buf,entry->d_name);
+
+                        // if the entry is a regular file 
+                        files.push_back(string(buf));
+                        */
+                }
+                else if (DT_DIR == entry->d_type)
+                {
+                        if (0 == strcmp(entry->d_name, ".") || 0 == strcmp(entry->d_name, ".."))
+                                continue;
+
+                        dir_list.push_back(string(entry->d_name));
+                }
+        }
+        closedir(dirp);
+}
