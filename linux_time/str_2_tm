@@ -1,0 +1,26 @@
+
+#include "time.h"
+
+
+//将字符串转换为tm时间
+tm tm1;
+const char* time_str="2018-11-11";
+strptime(str, "%Y-%m-%d", &tm1); 
+
+/*      
+//tm时间转字符串
+char buf[128];
+strftime(buf, 64, "%Y-%m-%d", &tm1);
+std::cout << buf << std::endl;
+*/
+
+//time_t t1 = mktime(&tm1);
+
+//获取当前时间
+time_t now;
+time(&now);
+
+//time_t转tm格式
+tm *tm2=gmtime(&now);
+//strftime(buf, 64, "%Y-%m-%d", tm2);
+//std::cout << buf << std::endl;
