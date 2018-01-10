@@ -1,0 +1,65 @@
+#include <fcntl.h>    //for open
+#include<unistd.h>    //for access
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#include <string>
+
+int create_if_not_exist(std::string dstpathname)
+{
+    //exist？
+    int ret = access(dstpathname.c_str(), F_OK);
+    int dpb;
+    if (0 != ret)
+    {
+            //create
+            dpb = open(dstpathname.c_str(), O_RDWR |O_CREAT| O_BINARY, 0755);
+            if (dpb == -1)
+            {
+                    printf("%s create failed!\n", dstpathname.c_str());
+                    return -1;
+            }
+
+            close(dpb);
+    }
+
+    return 0;
+}
+
+int copy_if_not_exist(std::string mode_path_name, std::string dstpathname)
+{
+    //exist ?
+    int ret = create_if_not_exist(dstpathname);
+    if(0 != ret)
+    {
+            printf("%s open or create failed\n", dstpathname.c_str());
+            return -1;
+    }
+
+//open
+        int dpb=open(dstpathname.c_str(),O_RDWR|O_TRUNC);
+        if(-1==dpb)
+        {
+            printf("%s open failed\n", dstpathname.c_str());
+            return -1;
+        }
+
+    //read & copy
+    int fpb = open(mode_path_name.c_str(), O_RDONLY | O_BINARY);
+    if (fpb == -1)
+    {
+        printf("%s doesn't exists\n",mode_path_name.c_str());
+        return -1;
+    }
+
+    //copy
+    char buff[1024]={0};
+    int len=0;
+     while(len = read(fpb,buff,1024))
+        write(dpb,buff,len);
+
+    close(fpb);
+    close(dpb);
+
+    return 0;
+}
