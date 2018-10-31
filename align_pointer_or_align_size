@@ -1,0 +1,34 @@
+#align size to n( should be power of 2)
+
+inline size_t align_size(size_t sz, int n)
+{
+    return (sz + n-1) & -n;
+}
+
+#align pointer to 8 or 4
+#thanks for 
+#https://stackoverflow.com/questions/4840410/how-to-align-a-pointer-in-c
+
+uint8_t    ary[1024];
+uint8_t   *stack = ary + 510;
+uintptr_t  addr  = (uintptr_t)stack;
+
+if (addr % 8 != 0)
+    addr += 8 - addr % 8;
+stack = (uint8_t *)addr;
+
+This ensures that the value in stack is aligned on an 8-byte boundary, rounded up. Your question asks for rounding down to a 4-byte boundary, so the code changes to:
+
+if (addr % 4 != 0)
+    addr -= addr % 4;
+stack = (uint8_t *)addr;
+
+Yes, you can do that with bit masks too. Either:
+
+addr = (addr + (8 - 1)) & -8;  // Round up to 8-byte boundary
+
+or:
+
+addr &= -4;                    // Round down to a 4-byte boundary
+
+This only works correctly if the LHS is a power of two — not for arbitrary values. The code with modulus operations will work correctly for any (positive) modulus.
