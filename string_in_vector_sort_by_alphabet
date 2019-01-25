@@ -1,0 +1,20 @@
+#include <string>
+#include <vector>
+
+bool comp(std::string& i, std::string& j) { 
+   int ret = strcmp(i.c_str(), j.c_str());
+   //printf("i: %s  j:  %s  ret:%d\n", i.c_str(), j.c_str(), ret);
+   bool b = (ret < 0) ? true: false;
+   return b;
+}
+
+//for sort
+std::vector<std::string>   names;
+
+for (int i = 0; i < sz_out; i++) {
+   std::string name = ......;
+   names.push_back(name);
+}
+
+//按字母排序：升序
+std::sort(output_names.begin(), output_names.end(), comp);
