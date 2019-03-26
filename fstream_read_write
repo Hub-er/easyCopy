@@ -1,6 +1,16 @@
 
 #include<fstream>
 
+//获取二进制文件长度
+std::streampos b, e;
+std::ifstream  input(bin_file, std::ios::in | std::ios::binary);
+b = input.tellg();
+input.seekg (0, std::ios::end);
+e = input.tellg();
+unsigned long len = end - begin;
+printf("input size:%ld\n", len);
+input.seekg(0, std::ios::beg);    //读取内容前，重置cursor位置，不然读取的内容为空
+
  //二进制文件-->vector
 std::ifstream file("./1.jpg");
 std::vector<uchar> data;
